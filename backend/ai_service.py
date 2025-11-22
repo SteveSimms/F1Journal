@@ -3,7 +3,7 @@ import json
 from typing import List, Dict, Any
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "llama3"
+MODEL = "llama3.2"
 
 async def query_ollama(prompt: str) -> str:
     """
@@ -22,6 +22,9 @@ async def query_ollama(prompt: str) -> str:
             )
             response.raise_for_status()
             return response.json().get("response", "")
+        except httpx.HTTPStatusError as e:
+            print(f"Ollama API Error: {e.response.text}")
+            return None
         except httpx.RequestError:
             print("Ollama not reachable. Using mock data.")
             return None
