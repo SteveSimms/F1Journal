@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CareerStep } from '../data/careerData';
-import { ChevronRight, DollarSign, Trophy } from 'lucide-react';
+import { ChevronRight, Trophy } from 'lucide-react';
 
 interface ResultCardProps {
     step: CareerStep;

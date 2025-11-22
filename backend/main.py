@@ -3,7 +3,17 @@ from pydantic import BaseModel
 from typing import List, Optional
 from ai_service import search_career_info, generate_career_path
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="GridPath API", description="AI-driven backend for F1 Career Search")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class SearchQuery(BaseModel):
     query: str

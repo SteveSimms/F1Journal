@@ -6,7 +6,7 @@ export interface CareerStep {
   costEstimate: string;
   requirements: string[];
   tips: string[];
-  category: 'Karting' | 'Single Seater' | 'Professional';
+  category: string;
 }
 
 export const careerPath: CareerStep[] = [

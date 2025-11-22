@@ -38,7 +38,14 @@ async def search_career_info(query: str) -> List[Dict[str, Any]]:
     User Query: "{query}"
     
     Provide 2 distinct, factual insights related to the query for an aspiring driver.
-    Format the output as a JSON list of objects with keys: "title", "description", "relevance" (float 0-1).
+    Format the output as a JSON list of objects with keys: 
+    - "title" (string)
+    - "description" (string)
+    - "cost_estimate" (string, e.g. "$5,000/yr")
+    - "age_range" (string, e.g. "6-10 years")
+    - "requirements" (list of strings)
+    - "relevance" (float 0-1)
+    
     Do not include any markdown formatting or extra text. Just the JSON.
     """
     
@@ -56,14 +63,24 @@ async def search_career_info(query: str) -> List[Dict[str, Any]]:
     # Fallback Mock Data
     return [
         {
-            "title": "AI Insight (Fallback)",
-            "description": f"We couldn't connect to the AI, but here is a general tip: {query} is important for your career.",
-            "relevance": 0.9
+            "id": "fallback-1",
+            "title": "Karting Basics (AI Offline)",
+            "description": "The first step for any F1 driver. Start with Bambino or Cadet karts.",
+            "age_range": "5-12 years",
+            "cost_estimate": "$5,000 - $15,000 / yr",
+            "requirements": ["Age 6+", "Safety Gear", "Club License"],
+            "category": "Karting",
+            "relevance": 0.95
         },
         {
-            "title": "Karting Basics",
-            "description": "Start with Bambino (age 5-8) or Cadet (age 8-12) karting classes.",
-            "relevance": 0.85
+            "id": "fallback-2",
+            "title": "F4 License (AI Offline)",
+            "description": "You need an FIA Grade D license to compete in Formula 4.",
+            "age_range": "15+ years",
+            "cost_estimate": "$150,000 / yr",
+            "requirements": ["FIA Grade D License", "Completion of Karting"],
+            "category": "Formula 4",
+            "relevance": 0.88
         }
     ]
 

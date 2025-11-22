@@ -1,23 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
 import { DetailPage } from './pages/DetailPage';
-import { careerPath } from './data/careerData';
-import { Flag, Info } from 'lucide-react';
+import { CareerMindMap } from './components/CareerMindMap';
+import { searchCareerInfo, generateCareerPath, SearchResult, CareerStep } from './api';
+import { Flag, Info, Map, List, Zap } from 'lucide-react';
 
 function Home() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [mindMapSteps, setMindMapSteps] = useState<CareerStep[]>([]);
 
-  const filteredSteps = careerPath.filter(step => {
-    const term = searchTerm.toLowerCase();
-    return (
-      step.title.toLowerCase().includes(term) ||
-      step.description.toLowerCase().includes(term) ||
-      step.category.toLowerCase().includes(term) ||
-      step.requirements.some(req => req.toLowerCase().includes(term))
-    );
-  });
+  // Debounced Search
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchTerm) {
+        setLoading(true);
+        const data = await searchCareerInfo(searchTerm);
+        setResults(data);
+        setLoading(false);
+      } else {
+        setResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  const handleGeneratePath = async () => {
+    setLoading(true);
+    setViewMode('map');
+    // Hardcoded profile for demo - in real app, get from user input
+    const pathData = await generateCareerPath(12, 50000, "USA");
+    if (pathData) {
+      setMindMapSteps(pathData.suggested_path);
+    }
+    setLoading(false);
+  };
 
   return (
     <main className="container">
@@ -47,9 +69,32 @@ function Home() {
         </p>
       </div>
 
-      {/* Search */}
+      {/* Search & Controls */}
       <div className="animate-enter delay-2">
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '3rem' }}>
+          <button
+            onClick={() => setViewMode('list')}
+            className="btn"
+            style={{
+              backgroundColor: viewMode === 'list' ? 'var(--f1-red)' : 'rgba(255,255,255,0.1)',
+              color: 'white'
+            }}
+          >
+            <List size={18} style={{ marginRight: '0.5rem' }} /> List View
+          </button>
+          <button
+            onClick={handleGeneratePath}
+            className="btn"
+            style={{
+              backgroundColor: viewMode === 'map' ? 'var(--f1-red)' : 'rgba(255,255,255,0.1)',
+              color: 'white'
+            }}
+          >
+            <Map size={18} style={{ marginRight: '0.5rem' }} /> AI Career Map
+          </button>
+        </div>
       </div>
 
       {/* Results */}
@@ -60,27 +105,54 @@ function Home() {
           marginBottom: '1.5rem',
           borderLeft: '4px solid var(--f1-red)',
           paddingLeft: '1rem',
-          textTransform: 'uppercase'
+          textTransform: 'uppercase',
+          display: 'flex',
+          alignItems: 'center'
         }}>
-          {searchTerm ? `Search Results (${filteredSteps.length})` : 'Career Progression Path'}
+          {loading ? (
+            <>
+              <Zap className="animate-pulse" size={24} color="var(--f1-red)" style={{ marginRight: '0.5rem' }} />
+              AI Processing...
+            </>
+          ) : (
+            viewMode === 'map' ? 'Your Personalized Career Path' : `Search Results (${results.length})`
+          )}
         </h3>
       </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-        gap: '2rem'
-      }}>
-        {filteredSteps.map((step, index) => (
-          <div key={step.id} className={`animate-enter`} style={{ animationDelay: `${0.4 + (index * 0.1)}s` }}>
-            <ResultCard step={step} />
-          </div>
-        ))}
-      </div>
+      {viewMode === 'map' ? (
+        <div className="animate-enter">
+          <CareerMindMap steps={mindMapSteps} />
+          <p style={{ textAlign: 'center', marginTop: '1rem', color: 'var(--text-secondary)' }}>
+            *AI-generated path based on typical progression.
+          </p>
+        </div>
+      ) : (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+          gap: '2rem'
+        }}>
+          {results.map((step, index) => (
+            <div key={index} className={`animate-enter`} style={{ animationDelay: `${0.1 * index}s` }}>
+              <ResultCard step={{
+                id: step.id || `api-${index}`,
+                title: step.title,
+                ageRange: step.age_range || 'N/A',
+                description: step.description,
+                costEstimate: step.cost_estimate || 'Varies',
+                requirements: step.requirements || [],
+                category: step.category || 'General',
+                tips: []
+              }} />
+            </div>
+          ))}
+        </div>
+      )}
 
-      {filteredSteps.length === 0 && (
+      {!loading && results.length === 0 && viewMode === 'list' && searchTerm && (
         <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-secondary)' }}>
-          <p>No results found for "{searchTerm}". Try searching for "karting" or "license".</p>
+          <p>No results found for "{searchTerm}". The AI is thinking...</p>
         </div>
       )}
     </main>
