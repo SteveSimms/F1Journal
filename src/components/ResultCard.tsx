@@ -45,7 +45,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ step }) => {
                 border: '1px solid rgba(255,255,255,0.05)'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.8rem', color: '#4ade80' }}>
-                    <DollarSign size={18} style={{ marginRight: '0.5rem' }} />
+                    {/* <DollarSign size={18} style={{ marginRight: '0.5rem' }} /> */}
                     <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{step.costEstimate}</span>
                 </div>
 
